@@ -1,32 +1,33 @@
-# Personal Finance Transaction Processor
+# Personal Finance Tracker - Bank Statement Processor
 
 ## Overview
 
-This Python script automates the process of categorizing and uploading bank transactions from CSV files to a Google Sheets spreadsheet. It supports multiple bank file formats and provides an intelligent transaction categorization system.
+This application processes CSV bank statements, reformats the data, categorizes transactions, and uploads them to a Google Sheet for personal finance tracking.
 
 ## Features
 
-- 🏦 Supports multiple bank CSV files (currently CIBC and Scotia)
-- 🏷️ Intelligent transaction categorization
-- 📊 Automatic upload to Google Sheets
-- 💡 Customizable transaction categories
-- 🔒 Secure service account authentication
+- Bank Statement Compatibility: Processes bank statements from CIBC and Scotia Bank.
+- Automated Categorization: Assigns transactions to categories using a categories.json file with customizable keywords.
+- Google Sheets Integration: Automatically uploads transactions to a specified Google Sheet, creating a streamlined financial
+tracking process.
+- Dynamic File Handling: Handles monthly bank statement files dynamically, supporting different file formats for each bank.
 
 ## Prerequisites
-
-### Dependencies
-- Python 3.7+
-- Required libraries:
-  - `csv`
-  - `gspread`
-  - `time`
+- Python 3.8+
+- Required Python libraries:
+	- os
+	- csv
+	- json
+	- gspread
+- Google Service Account credentials JSON file for accessing Google Sheets.
+- A categories.json file with transaction categories and associated keywords.
 
 ### Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://your-repository-url.git
-   cd your-project-directory
+    git clone https://github.com/yourusername/finance-tracker.git
+    cd finance-tracker
    ```
 
 2. Install required Python packages:
@@ -34,30 +35,44 @@ This Python script automates the process of categorizing and uploading bank tran
    pip install gspread
    ```
 
-3. Set up a Google Cloud Service Account
+3.	Place your Google Sheets service account credentials file in a secure location. By default, the app looks for this file at:
+    ```
+    ~/.config/gspread/service_account.json
+    ```
+
+4.	Create a categories.json file to define transaction categories and keywords:
+    ```
+    {
+    "Food": ["restaurant", "grocery"],
+    "Transport": ["uber", "gas"],
+    "Entertainment": ["netflix", "cinema"],
+    "Misc": []
+    }
+    ```
+
+5. Set up a Google Cloud Service Account
    - Create a service account in Google Cloud Console
    - Generate and download a JSON key file
    - Share your Google Sheet with the service account email
 
 ### Configuration
 
-1. Update the `categories` dictionary in the script to match your spending patterns
-2. Set the `month` variable to the current month
-3. Modify the `files` list to include your bank CSV file names
-4. Ensure your Google Sheet is named "Personal Finances" with a worksheet matching the month
+1. Modify the files in Bank Statements to include your own bank and credit card transactions
+2. Edit sort_cibc and sort_scotia functions to match your bank statements
+3. Ensure your Google Sheet is named "Personal Finances" with a worksheet matching the month
 
 ## Usage
 
 ```bash
-python transaction_processor.py
+python main.py
 ```
 
 ## Customization
 
 ### Adding Categories
-Modify the `categories` dictionary to add or update transaction categories. Each category is defined with a list of keywords that trigger the categorization.
+Modify the `categories` .json file to add or update transaction categories. Each category is defined with a list of keywords that trigger the categorization.
 
-```python
+```
 categories = {
     "Food: restaurants": ["tim hortons", "starbucks", "mcdonald's", ...],
     "Groceries": ["walmart", "costco", ...],
@@ -65,12 +80,25 @@ categories = {
 }
 ```
 
+## Example Output
+
+### Sample console output during execution:
+```
+Processing files for January...
+Processing file: Bank Statements/cibc_January.csv
+('2024-01-10', 'Grocery Store', 50.75, 'Food')
+('2024-01-15', 'Gas Station', 30.00, 'Transport')
+Successfully uploaded 2 transactions.
+
+Processing files for February...
+No files found for February. Skipping...
+```
+
 ## Error Handling
 
-The script includes basic error handling:
-- Skips transactions with insufficient data
-- Prints error messages for problematic transactions
-- Includes a 2-second delay between Google Sheets updates to prevent rate-limiting
+- Missing Files: Skips months with no corresponding bank statement files.
+- Invalid Transactions: Transactions without a description or amount are categorized as “uncategorized.”
+- Google API Errors: Errors during upload are logged, and the process continues with other transactions.
 
 ## Security Notes
 
