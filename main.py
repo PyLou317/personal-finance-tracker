@@ -45,10 +45,11 @@ def format_cibc(file):
             if len(row) == 5:
                 if row[2] == '':
                     amount = 0 
+                # Return amount as a negative
                 else:   
-                    amount = float(row[2])
+                    amount = -float(row[2])
             else:
-                amount = float(row[3])
+                amount = -float(row[3])
                  
             category = categorize_transaction(name)            
             transaction = ((date, name, amount, category))
@@ -63,27 +64,25 @@ def format_scotia(file):
         csv_reader = csv.reader(csv_file)
 
         for row in csv_reader:
+            if len(row) < 4:  # Skip rows with fewer than 4 columns
+                print(f"Skipping malformed row: {row}")
+                continue
+
             date = row[0]
-            
-            if row[3] == '':
-                name = "No Description"
-            else:
-                name = row[3]
-                
+            name = row[3] if row[3] != '' else "No Description"
             amount = float(row[1])
-                 
-            category = categorize_transaction(name)            
-            transaction = ((date, name, amount, category))
-            print(transaction)
+            category = categorize_transaction(name)
+            transaction = (date, name, amount, category)
+            print(f"Parsed transaction: {transaction}")
             transactions.append(transaction)
     return transactions
 
 def sort_transactions(file):
     transactions = []
     
-    if "Scotia" in file:
+    if "scotia" in file.lower():
         transactions.extend(format_scotia(file))  # Use `extend` to add flat transactions
-    elif "cibc" in file:
+    elif "cibc" in file.lower():
         transactions.extend(format_cibc(file))
     
     return transactions
